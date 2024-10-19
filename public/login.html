@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureVault - Login</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;800&display=swap">
+    <link rel="stylesheet" href="styles.css">
+<body>
+    <div class="content">
+        <h1 class="title">SecureVault</h1>
+        <div class="login-form">
+            <label for="username"></label>
+            <input type="text" id="username" placeholder="Enter your username" required>
+            <br>
+            <label for="password"></label>
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <button class="button" id="loginButton">Login</button>
+            <p>Don't have an account? <a href="signup.html" style="color: var(--clr-1);">Sign Up</a></p>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for handling login submission
+        document.getElementById("loginButton").addEventListener("click", function (event) {
+            event.preventDefault(); // Prevent the default form submission
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            // Fetch the correct path of the users.json file to validate login
+            fetch('users.json') 
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(users => {
+                    if (isValidLogin(users, username, password)) {
+                        // Redirect to landing.html after a 2-second delay
+                        setTimeout(() => {
+                            window.location.href = "landing.html"; // Adjust path if necessary
+                        }, 100);
+                    } else {
+                        alert("Invalid username or password");
+                    }
+                })
+        });
+
+        function isValidLogin(users, username, password) {
+            return users.some(user => user.username === username && user.password === password);
+        }
+    </script>
+</body>
+</html>

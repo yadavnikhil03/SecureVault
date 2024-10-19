@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download File - SecureVault</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="content">
+        <h1 class="title">Download File</h1>
+        <input type="text" id="fileId" placeholder="Enter file ID" required>
+        <input type="text" id="decryptionKey" placeholder="Enter decryption key" required>
+        <button class="button" id="downloadButton">Download</button>
+        <p id="errorMessage" style="color: red; display: none;"></p>
+    </div>
+
+    <script>
+        document.getElementById("downloadButton").addEventListener("click", function () {
+            const fileId = document.getElementById("fileId").value;
+            const decryptionKey = document.getElementById("decryptionKey").value;
+            const errorMessage = document.getElementById("errorMessage");
+            errorMessage.style.display = 'none';
+
+            if (!fileId || !decryptionKey) {
+                alert("Please enter both file ID and decryption key.");
+                return;
+            }
+
+            // Fetch the encrypted file from the server
+            fetch('/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ fileId })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message);
+                    });
+                }
+                return response.blob(); // Get the response as a blob for file download
+            })
+            .then(async (encryptedBlob) => {
+                const arrayBuffer = await encryptedBlob.arrayBuffer();
+                const decryptedBuffer = await decryptFileClientSide(new Uint8Array(arrayBuffer), decryptionKey);
+
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([decryptedBuffer]));
+                a.download = fileId; // Download as original file ID
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(a.href);
+            })
+            .catch(error => {
+                errorMessage.innerText = `Error downloading file: ${error.message}`;
+                errorMessage.style.display = 'block';
+            });
+        });
+
+        // Client-side decryption function
+        async function decryptFileClientSide(encryptedData, decryptionKey) {
+            const key = await window.crypto.subtle.importKey(
+                "raw",
+                new TextEncoder().encode(decryptionKey),
+                { name: "AES-CBC" },
+                false,
+                ["decrypt"]
+            );
+
+            const iv = encryptedData.slice(0, 16); // Extract IV from the start
+            const encryptedContent = encryptedData.slice(16); // Remaining content is encrypted
+
+            const decryptedContent = await window.crypto.subtle.decrypt(
+                { name: "AES-CBC", iv },
+                key,
+                encryptedContent
+            );
+
+            return decryptedContent; // Return decrypted content
+        }
+    </script>
+</body>
+</html>

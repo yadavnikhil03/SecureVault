@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload File - SecureVault</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="content">
+        <h1 class="title">Upload File</h1>
+        <input type="file" id="fileInput" required>
+        <input type="text" id="encryptionKey" placeholder="Enter encryption key (32 characters)" required>
+        <button class="button" id="uploadButton">Upload</button>
+        <p id="uploadId" style="display: none;">Your upload ID: <span id="fileId"></span></p>
+        <p id="errorMessage" style="color: red; display: none;"></p>
+    </div>
+
+    <script>
+        document.getElementById("uploadButton").addEventListener("click", async function () {
+            const fileInput = document.getElementById("fileInput");
+            const encryptionKey = document.getElementById("encryptionKey").value;
+            const errorMessage = document.getElementById("errorMessage");
+            errorMessage.style.display = 'none';
+
+            if (fileInput.files.length === 0) {
+                alert("Please select a file.");
+                return;
+            }
+
+            if (encryptionKey.length !== 32) {
+                alert("Please enter a 32-character encryption key.");
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const encryptedFile = await encryptFileClientSide(file, encryptionKey); // Encrypt client-side
+
+            const formData = new FormData();
+            formData.append('file', new Blob([encryptedFile], { type: file.type }), file.name + '.enc');
+            formData.append('encryptionKey', encryptionKey);
+
+            // Upload the encrypted file to the server
+            fetch('/upload', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("fileId").innerText = data.fileId;
+                    document.getElementById("uploadId").style.display = "block";
+                } else {
+                    throw new Error(data.message);
+                }
+            })
+            .catch(error => {
+                errorMessage.innerText = `Error uploading file: ${error.message}`;
+                errorMessage.style.display = 'block';
+            });
+        });
+
+        // Client-side encryption function
+        async function encryptFileClientSide(file, encryptionKey) {
+            const key = await window.crypto.subtle.importKey(
+                "raw",
+                new TextEncoder().encode(encryptionKey),
+                { name: "AES-CBC" },
+                false,
+                ["encrypt"]
+            );
+
+            const iv = window.crypto.getRandomValues(new Uint8Array(16)); // Generate IV
+            const encryptedContent = await window.crypto.subtle.encrypt(
+                { name: "AES-CBC", iv },
+                key,
+                await file.arrayBuffer()
+            );
+
+            return new Uint8Array([...iv, ...new Uint8Array(encryptedContent)]); // Prepend IV to encrypted content
+        }
+    </script>
+</body>
+</html>
