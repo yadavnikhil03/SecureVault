@@ -24,3 +24,4 @@ document.getElementById("loginButton").addEventListener("click", function () {
 function isValidLogin(users, username, password) {
     return users.some(user => user.username === username && user.password === password);
 }
+

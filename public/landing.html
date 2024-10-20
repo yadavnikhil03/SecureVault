@@ -65,10 +65,29 @@
             transition: background-color 0.3s;
             position: relative;
             overflow: hidden;
+            position: relative;
         }
 
-        .button:hover {
+        .button::before {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg);
+            color: var(--clr-1);
+            border: 1px solid var(--clr-1);
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            transform: translate(1px, 1px);
+            z-index: -1;
+        }
+
+        .button:hover::before {
             background-color: var(--clr-2);
+            color: #000;
         }
 
         .aurora {
@@ -232,6 +251,12 @@
                 border-radius: 37% 29% 27% 27% / 28% 25% 41% 37%;
             }
         }
+
+        .welcome-message {
+            font-size: 1.5rem;
+            color: var(--clr-1);
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -239,8 +264,8 @@
         <h1 class="title">SecureVault</h1>
         <p class="subtitle">Made with ❤️ by Nikhil</p>
         <div class="buttons">
-            <button class="button" onclick="location.href='upload.html'">Upload</button>
-            <button class="button" onclick="location.href='download.html'">Download</button>
+            <button class="button" data-text="Upload" onclick="location.href='upload.html'">Upload</button>
+            <button class="button" data-text="Download" onclick="location.href='download.html'">Download</button>
         </div>
         <div class="aurora">
             <div class="aurora__item"></div>
@@ -248,6 +273,25 @@
             <div class="aurora__item"></div>
             <div class="aurora__item"></div>
         </div>
+        <div class="welcome-message" id="welcomeMessage"></div>
     </div>
 </body>
+<script>
+    function setWelcomeMessage() {
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const currentHour = new Date().getHours();
+
+        if (currentHour < 12) {
+            welcomeMessage.textContent = "Good Morning! Welcome to SecureVault.";
+        } else if (currentHour < 18) {
+            welcomeMessage.textContent = "Good Afternoon! Welcome to SecureVault.";
+        } else {
+            welcomeMessage.textContent = "Good Evening! Welcome to SecureVault.";
+        }
+    }
+
+    // Call the function when the page loads
+    window.onload = setWelcomeMessage;
+</script>
+
 </html>

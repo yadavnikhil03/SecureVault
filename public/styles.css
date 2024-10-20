@@ -174,3 +174,25 @@ input::placeholder {
     75% { border-radius: 28% 49% 29% 100% / 93% 20% 64% 25%; }
     100% { border-radius: 37% 29% 27% 27% / 28% 25% 41% 37%; }
 }
+
+.logo {
+    width: 100px; /* Adjust the width as needed */
+    height: auto; /* Maintain aspect ratio */
+    margin-bottom: 0; /* Space between logo and title */
+    transform: rotate(270deg); /* Rotate the logo 90 degrees */
+    transform-origin: center; /* Center the rotation */
+}
+
+
+.tagline {
+    font-size: 1.2rem; /* Adjust as needed */
+    color: var(--clr-1); /* Changed to a more Telegram-like quote color */
+    margin: 10px 0;
+    font-weight: 400; /* Lighter weight for differentiation */
+    border: 1px solid var(--clr-1); /* Changed border color for consistency */
+    padding: 10px; /* Add padding for better appearance */
+    border-radius: 5px; /* Add border-radius for rounded corners */
+    background-color: rgba(0, 194, 255, 0.1); /* Added a subtle background for a quote-like appearance */
+}
+
+
