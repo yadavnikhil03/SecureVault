@@ -24,7 +24,33 @@
     </div>
     <script>
         function login() {
-            window.location.href = "landing.html";
+            var email = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email, password: password }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    window.location.href = "landing.html";  // Redirect to the landing page if login is successful
+                } else {
+                    alert('Invalid email or password');  // Show error if login failed
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('You need to Register.');
+            });
         }
     </script>
 </body>
